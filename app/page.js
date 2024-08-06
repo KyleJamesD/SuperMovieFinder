@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUserAuth } from "./_utils/auth-context";
 import { getLikedMovies, getSavedMovies, addLikedMovie, addSavedMovie, removeAllLikedMovies, removeAllSavedMovies, deleteLikedMovie, deleteSavedMovie } from "./_services/movie-list-service";
-import MovieCard from './components/MovieCard';
+import MovieCard from "./components/MovieCard";
 
 export default function LandingPage() {
   const { user, gitHubSignIn, firebaseSignOut } = useUserAuth();
@@ -12,22 +12,21 @@ export default function LandingPage() {
   const [likedMovies, setLikedMovies] = useState([]);
   const [savedMovies, setSavedMovies] = useState([]);
 
-
   const addTestMovies = async () => {
     if (!user) {
       alert("Please log in to add test data");
       return;
     }
     
-    const testImdbIDs = [
-      "tt3774694", // Love (2015)
-      "tt0111161", // The Shawshank Redemption
-      "tt0068646", // The Godfather
+    const testMovieIds = [
+      "52959", // Star!
+      "136244", // Star
+      "1293992", // Star?
     ];
   
-    for (const imdbID of testImdbIDs) {
-      await handleLike(imdbID);
-      await handleSave(imdbID);
+    for (const movieId of testMovieIds) {
+      await handleLike(movieId);
+      await handleSave(movieId);
     }
   };
 
@@ -69,21 +68,21 @@ export default function LandingPage() {
     // Update searchResults state with the API response
   };
 
-  const handleLike = async (imdbID) => {
+  const handleLike = async (movieId) => {
     if (!user) {
       alert("Please log in to like movies");
       return;
     }
-    await addLikedMovie(user.uid, { id: imdbID });
+    await addLikedMovie(user.uid, { id: movieId });
     fetchLikedAndSavedMovies();
   };
 
-  const handleSave = async (imdbID) => {
+  const handleSave = async (movieId) => {
     if (!user) {
       alert("Please log in to save movies");
       return;
     }
-    await addSavedMovie(user.uid, { id: imdbID });
+    await addSavedMovie(user.uid, { id: movieId });
     fetchLikedAndSavedMovies();
   };
 
@@ -205,6 +204,8 @@ export default function LandingPage() {
         </div>
 
         <div className="w-1/3">
+        {likedMovies.length > 0 && (
+          <>
             <div className="flex justify-between mb-4">
               <h2 className="text-xl font-bold text-black">Liked Movies</h2>
               <button
@@ -214,14 +215,20 @@ export default function LandingPage() {
                   Remove All
               </button>
             </div>
-          {likedMovies.map((movie) => (
-            <MovieCard 
-            key={movie.id} 
-            imdbID={movie.id} 
-            showDeleteButton={true}
-            onDelete={() => handleDeleteLikedMovie(movie)}/>
-          ))}
-          <div className="flex justify-between mb-4">
+            <div className = "overflow-x-auto whitespace-nowrap" style={{ height: 220 }}>
+              {likedMovies.map((movie) => (
+                <MovieCard
+                key={movie.id} 
+                movieId={movie.id} 
+                showDeleteButton={true}
+                onDelete={() => handleDeleteLikedMovie(movie)}/>
+              ))}
+            </div>
+            </>
+          )}
+          {savedMovies.length > 0 && (
+          <>
+          <div className="flex justify-between mb-4 mt-4">
           <h2 className="text-xl font-bold text-black">Saved Movies</h2>
           <button
                 onClick={handleRemoveAllSavedMovies}
@@ -230,14 +237,17 @@ export default function LandingPage() {
                   Remove All
               </button>
           </div>
-          {savedMovies.map((movie) => (
-            <MovieCard 
-            key={movie.id} 
-            imdbID={movie.id}
-            showDeleteButton={true}
-            onDelete={() => handleDeleteSavedMovie(movie)} />
-          ))}
-
+          <div className = "overflow-x-auto whitespace-nowrap" style={{ height: 220 }}>
+            {savedMovies.map((movie) => (
+              <MovieCard 
+              key={movie.id} 
+              movieId={movie.id}
+              showDeleteButton={true}
+              onDelete={() => handleDeleteSavedMovie(movie)} />
+            ))}
+          </div>
+          </>
+      )}
           <button
           onClick={addTestMovies}
           className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
